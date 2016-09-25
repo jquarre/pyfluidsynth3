@@ -106,7 +106,7 @@ class FluidSettings(object):
         key_type = self.handle.fluid_settings_get_type(self.settings, key)
 
         if key_type is self.FLUID_STR_TYPE:
-            value = utility.fluidstring(key)
+            value = utility.fluidstring(value)
             if not self.handle.fluid_settings_setstr(self.settings, key, value):
                 raise KeyError(key)
 
