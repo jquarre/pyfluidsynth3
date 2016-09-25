@@ -1,4 +1,4 @@
-''' Common FluidSynth constants which are used in multiple files. 
+''' Common FluidSynth constants which are used in multiple files.
 
 Constants:
 FALSE -- Settings boolean value for false/off/no/0.
@@ -13,4 +13,3 @@ TRUE = 1
 
 OK = 0
 FAILED = -1
-

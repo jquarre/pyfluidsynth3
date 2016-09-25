@@ -1,17 +1,18 @@
 from . import constants, utility
 from ctypes import byref, c_char_p, c_double, c_int
 
+
 class FluidSettings(object):
-    ''' Represents the FluidSynth settings as defined in settings.h. A instance of this class 
-    can be used like an array aka like the fluidsettings_t object. This means you can get/set 
+    ''' Represents the FluidSynth settings as defined in settings.h. A instance of this class
+    can be used like an array aka like the fluidsettings_t object. This means you can get/set
     values using brackets (See example below).
-    
+
     This class is inspired by the FluidSettings object from pyfluidsynth by MostAwesomeDude.
-    
+
     Example:
-    fluidsettings = FluidSettings( handle )
+    fluidsettings = FluidSettings(handle)
     fluidsettings['audio.driver'] = 'alsa'
-    
+
     Constants:
     FLUID_NO_TYPE -- Settings type: Undefined type.
     FLUID_NUM_TYPE -- Settings type: Numeric (double).
@@ -21,66 +22,66 @@ class FluidSettings(object):
     QUALITY_LOW -- Quality preset: Low.
     QUALITY_MED -- Quality preset: Medium.
     QUALITY_HIGH -- Quality preset: High.
-    
+
     Member:
-    handle -- The handle to the FluidSynth library. Should be FluidHandle but a raw handle will 
+    handle -- The handle to the FluidSynth library. Should be FluidHandle but a raw handle will
                probably work, too (FluidHandle).
     quality -- The last quality preset used (string).
     settings -- The FluidSynth settings object (fluidsettings_t).
     '''
-    
-    (FLUID_NO_TYPE, 
-     FLUID_NUM_TYPE, 
-     FLUID_INT_TYPE, 
+
+    (FLUID_NO_TYPE,
+     FLUID_NUM_TYPE,
+     FLUID_INT_TYPE,
      FLUID_STR_TYPE,
      FLUID_SET_TYPE) = range(-1, 4)
-     
+
     QUALITY_LOW = 'low'
     QUALITY_MEDIUM = 'med'
     QUALITY_HIGH = 'high'
 
-    def __init__( self, handle ):
-        ''' Create new FluidSynth settings instance using the given handle. Default quality is set 
+    def __init__(self, handle):
+        ''' Create new FluidSynth settings instance using the given handle. Default quality is set
         to medium. '''
         self.handle = handle
         self.settings = self.handle.new_fluid_settings()
         self.quality = self.QUALITY_MEDIUM
 
     @property
-    def quality( self ):
+    def quality(self):
         ''' Returns the last quality preset used. '''
         return self._quality
 
     @quality.setter
-    def quality( self, quality ):
+    def quality(self, quality):
         ''' Sets the given quality preset. '''
         self._quality = quality
-        
+
         if quality == self.QUALITY_LOW:
             self['synth.chorus.active'] = constants.FALSE
             self['synth.reverb.active'] = constants.FALSE
             self['synth.sample-rate'] = 22050
-            
+
         elif quality == self.QUALITY_MEDIUM:
             self['synth.chorus.active'] = constants.FALSE
             self['synth.reverb.active'] = constants.TRUE
             self['synth.sample-rate'] = 44100
-            
+
         elif quality == self.QUALITY_HIGH:
             self['synth.chorus.active'] = constants.TRUE
             self['synth.reverb.active'] = constants.TRUE
             self['synth.sample-rate'] = 44100
 
-    def __del__( self ):
+    def __del__(self):
         ''' Deletes the FluidSynth settings object. '''
-        self.handle.delete_fluid_settings( self.settings )
+        self.handle.delete_fluid_settings(self.settings)
 
-    def __getitem__( self, key ):
+    def __getitem__(self, key):
         ''' Returns the value of the given settings key. '''
-        
-        key = utility.fluidstring( key )
-        key_type = self.handle.fluid_settings_get_type( self.settings, key )
-        
+
+        key = utility.fluidstring(key)
+        key_type = self.handle.fluid_settings_get_type(self.settings, key)
+
         if key_type is self.FLUID_NUM_TYPE:
             val = c_double()
             func = self.handle.fluid_settings_getnum
@@ -91,42 +92,42 @@ class FluidSettings(object):
             val = c_char_p()
             func = self.handle.fluid_settings_getstr
         else:
-            raise KeyError( key )
+            raise KeyError(key)
 
-        if func( self.settings, key, byref(val) ):
+        if func(self.settings, key, byref(val)):
             return val.value
         else:
-            raise KeyError( key )
+            raise KeyError(key)
 
-    def __setitem__( self, key, value ):
+    def __setitem__(self, key, value):
         ''' Sets the value of the given settings key to value. '''
-        
-        key = utility.fluidstring( key )
-        key_type = self.handle.fluid_settings_get_type( self.settings, key )
-        
+
+        key = utility.fluidstring(key)
+        key_type = self.handle.fluid_settings_get_type(self.settings, key)
+
         if key_type is self.FLUID_STR_TYPE:
-            value = utility.fluidstring( key )
-            if not self.handle.fluid_settings_setstr( self.settings, key, value ):
-                raise KeyError( key )
-            
+            value = utility.fluidstring(key)
+            if not self.handle.fluid_settings_setstr(self.settings, key, value):
+                raise KeyError(key)
+
         else:
             # Coerce string value to integer before going further.
-            value = self.__coerce_to_int( value )
-            
+            value = self.__coerce_to_int(value)
+
             if key_type is self.FLUID_NUM_TYPE:
-                if not self.handle.fluid_settings_setnum( self.settings, key, value ):
-                    raise KeyError( key )
-                
+                if not self.handle.fluid_settings_setnum(self.settings, key, value):
+                    raise KeyError(key)
+
             elif key_type is self.FLUID_INT_TYPE:
-                if not self.handle.fluid_settings_setint( self.settings, key, value ):
-                    raise KeyError( key )
-                
+                if not self.handle.fluid_settings_setint(self.settings, key, value):
+                    raise KeyError(key)
+
             else:
-                raise KeyError( key )
-            
-    def __coerce_to_int( self, stringValue ):
+                raise KeyError(key)
+
+    def __coerce_to_int(self, stringValue):
         ''' Turn a string into an integer. '''
         try:
-            return int( stringValue )
+            return int(stringValue)
         except ValueError:
-            return int( stringValue.lower() not in ('false', 'no', 'off') )
+            return int(stringValue.lower() not in ('false', 'no', 'off'))
