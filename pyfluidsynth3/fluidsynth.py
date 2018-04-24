@@ -24,6 +24,7 @@ class FluidSynth():
 
     def __del__(self):
         ''' Removes all soundfonts and deletes synth instance. '''
+        print("Killing Synth.")
         failed = []
         for sf in self._sf_dict:
             result = self.handle.fluid_synth_sfunload(self.synth, self._sf_dict[sf], True)

@@ -125,6 +125,33 @@ class FluidHandle():
         self.delete_fluid_audio_driver.argtypes = (c_void_p,)
         self.delete_fluid_audio_driver.restype = None
 
+        # Midi driver and router API
+        self.new_fluid_midi_driver = self.handle.new_fluid_midi_driver
+        self.new_fluid_midi_driver.argtypes = (c_void_p, c_void_p, c_void_p)
+        self.new_fluid_midi_driver.restype = c_void_p
+
+        self.delete_fluid_midi_driver = self.handle.delete_fluid_midi_driver
+        self.delete_fluid_midi_driver.argtypes = (c_void_p,)
+        self.delete_fluid_midi_driver.restype = None
+
+        handle_midi_event_func_t = CFUNCTYPE(c_int, c_void_p, c_void_p)
+
+        self.fluid_synth_handle_midi_event = self.handle.fluid_synth_handle_midi_event
+        self.fluid_synth_handle_midi_event.argtypes = (c_void_p, c_void_p)
+        self.fluid_synth_handle_midi_event.restype = c_int
+
+        self.new_fluid_midi_router = self.handle.new_fluid_midi_router
+        self.new_fluid_midi_router.argtypes = (c_void_p, c_void_p, c_void_p)
+        self.new_fluid_midi_router.restype = c_void_p
+
+        self.delete_fluid_midi_router = self.handle.delete_fluid_midi_router
+        self.delete_fluid_midi_router.argtypes = (c_void_p,)
+        self.delete_fluid_midi_router.restype = None
+
+        self.fluid_midi_router_handle_midi_event = self.handle.fluid_midi_router_handle_midi_event
+        self.fluid_midi_router_handle_midi_event.argtypes = (c_void_p, c_void_p)
+        self.fluid_midi_router_handle_midi_event.restype = c_int
+
         # From midi.h
         self.new_fluid_player = self.handle.new_fluid_player
         self.new_fluid_player.argtypes = (c_void_p,)
